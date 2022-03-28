@@ -1,4 +1,5 @@
 import io
+from xml.dom import minidom
 
 from PyQt5 import QtWidgets
 from striprtf.striprtf import rtf_to_text
@@ -57,8 +58,53 @@ def extract_text_from_pdf(pdf_path):
 
 
 def save_dictionary():
-    temp = ""
-    return temp
+    file = asksaveasfile(filetypes=(("dict file", "*.dict"),), defaultextension=("dict file", "*.dict"))
+    if file is None:
+        return
+    doc = minidom.Document()
+    root_el = doc.createElement('root')
+
+    words = main_dictionary
+
+    words.sort(key=lambda x: x.lexeme, reverse=True)
+
+    for i in words:
+        word = doc.createElement('word')
+        lexeme = doc.createElement('lexeme')
+        normalized = doc.createElement('normalized')
+        pos = doc.createElement('POS')
+        gender = doc.createElement('gender')
+        case = doc.createElement('case')
+        number = doc.createElement('number')
+
+        text1 = doc.createTextNode(i.lexeme)
+        text2 = doc.createTextNode(i.normal_form)
+        text3 = doc.createTextNode(i.POS)
+        text4 = doc.createTextNode(i.gender)
+        text5 = doc.createTextNode(i.case)
+        text6 = doc.createTextNode(i.number)
+
+        lexeme.appendChild(text1)
+        normalized.appendChild(text2)
+        pos.appendChild(text3)
+        gender.appendChild(text4)
+        case.appendChild(text5)
+        number.appendChild(text6)
+
+        word.appendChild(lexeme)
+        word.appendChild(normalized)
+        word.appendChild(pos)
+        word.appendChild(gender)
+        word.appendChild(case)
+        word.appendChild(number)
+
+        root_el.appendChild(word)
+    doc.appendChild(root_el)
+
+    xml_str = doc.toprettyxml(indent="  ", encoding='UTF-8')
+
+    file.write(str(xml_str, 'UTF-8'))
+    file.close()
 
 
 def load_dictionary():
@@ -237,11 +283,11 @@ def showHelp():
 
 
 root = Tk()
-mainmenu = Menu(root)
-mainmenu.add_command(label='Сохранить имеющийся словарь в файл', command=save_dictionary)
-mainmenu.add_command(label='Загрузить имеющийся словарь из файла', command=load_dictionary)
-mainmenu.add_command(label='Помощь', command=showHelp)
-root.config(menu=mainmenu)
+main_menu = Menu(root)
+main_menu.add_command(label='Сохранить имеющийся словарь в файл', command=save_dictionary)
+main_menu.add_command(label='Загрузить имеющийся словарь из файла', command=load_dictionary)
+main_menu.add_command(label='Помощь', command=showHelp)
+root.config(menu=main_menu)
 
 space0 = Label(root)
 inputFrame = Frame(root, bd=2)
@@ -304,9 +350,9 @@ clearSearchButton = Button(searchFrame, text='Сброс', width=8, height=2, bg
 createVocabularyButton_textFile.config(command=open_file_to_read)
 createVocabularyButton_textField.config(command=create_vocabulary_from_text_field)
 clearVocabularyButton.config(command=clear_vocabulary)
-deleteElementButton.config(command=delete_item)  # ?
+deleteElementButton.config(command=delete_item)
 searchButton.config(command=get_search_result)
-# clearSearchButton.config(command=clear_search_result)
+clearSearchButton.config(command=update_vocabulary)
 #
 # editButton.config(command=update_item)
 # addButton.config(command=add_item)

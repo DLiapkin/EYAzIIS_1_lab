@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+  <word>
+    <lexeme>школы</lexeme>
+    <normalized>школа</normalized>
+    <POS>СУЩ</POS>
+    <gender>жр</gender>
+    <case>рд</case>
+    <number>ед</number>
+  </word>
+  <word>
+    <lexeme>очков</lexeme>
+    <normalized>очко</normalized>
+    <POS>СУЩ</POS>
+    <gender>ср</gender>
+    <case>рд</case>
+    <number>мн</number>
+  </word>
+  <word>
+    <lexeme>зонтом</lexeme>
+    <normalized>зонт</normalized>
+    <POS>СУЩ</POS>
+    <gender>мр</gender>
+    <case>тв</case>
+    <number>ед</number>
+  </word>
+  <word>
+    <lexeme>дождь</lexeme>
+    <normalized>дождь</normalized>
+    <POS>СУЩ</POS>
+    <gender>мр</gender>
+    <case>им</case>
+    <number>ед</number>
+  </word>
+</root>
