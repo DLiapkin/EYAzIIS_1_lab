@@ -92,6 +92,8 @@ def parse_text_from_file(string: str):
     for i in ignore_symbols:
         string = string.replace(i, ' ')
     text = string.split(' ')
+    while text.__contains__(''):
+        text.remove('')
     words = []
     counter = 0
     while counter < (len(text) - 1):
@@ -132,7 +134,8 @@ def parse_from_text_field(string: str):
     for i in ignore_symbols:
         string = string.replace(i, ' ')
     text = string.split(' ')
-    text.remove('')
+    while text.__contains__(''):
+        text.remove('')
     morph = MorphAnalyzer()
     words = []
     for lex in text:
@@ -157,6 +160,35 @@ def parse_from_text_field(string: str):
             main_dictionary.append(lex)
 
 
+def get_search_result():
+    search_req = searchEntry.get()
+    if search_req == "":
+        mb.showerror(title="Empty field error",
+                     message="Search field is empty! You are supposed to enter something before clicking that button.")
+        return
+
+    tree_items = vocabularyTree.get_children()
+    for item in tree_items:
+        temp = vocabularyTree.item(item, 'values')
+        if temp[0].lower().find(search_req.lower()) == -1:
+            vocabularyTree.delete(item)
+
+
+def delete_item():
+    try:
+        selected = vocabularyTree.focus()
+        temp = vocabularyTree.item(selected, 'values')
+
+        for word in main_dictionary:
+            if word.lexeme == temp[0]:
+                main_dictionary.remove(word)
+
+        vocabularyTree.delete(selected)
+    except Exception:
+        mb.showerror(title="Error", message="Have you selected any item before clicking that button?..")
+        return
+
+
 # обновление содержимого таблицы
 def update_vocabulary():
     vocabularyTree.delete(*vocabularyTree.get_children())
@@ -166,7 +198,12 @@ def update_vocabulary():
 
     for word in main_dictionary:
         vocabularyTree.insert('', 'end', values=(word.lexeme, word.normal_form,
-                                                 word.POS, word.lexeme[len(word.normal_form):], word.gender, word.case, word.number))
+                                                 word.POS, word.gender, word.case, word.number))
+
+
+def clear_vocabulary():
+    vocabularyTree.delete(*vocabularyTree.get_children())
+    main_dictionary.clear()
 
 
 if __name__ == '__main__':
@@ -220,13 +257,11 @@ deleteElementButton = Button(inputFrame, text='Удалить элемент', w
 space1 = Label(root)
 vocabularyFrame = Frame(root, bd=2)
 vocabularyTree = ttk.Treeview(vocabularyFrame,
-                              columns=("Лексема", "Основа", "Часть речи", "Окончание", "Род", "Падеж", "Число"),
-                              selectmode='browse',
-                              height=11)
+                              columns=("Лексема", "Основа", "Часть речи", "Род", "Падеж", "Число"),
+                              selectmode='browse', height=11)
 vocabularyTree.heading('Лексема', text="Лексема", anchor=W)
 vocabularyTree.heading('Основа', text="Основа", anchor=W)
 vocabularyTree.heading('Часть речи', text="Часть речи", anchor=W)
-vocabularyTree.heading('Окончание', text="Окончание", anchor=W)
 vocabularyTree.heading('Род', text="Род", anchor=W)
 vocabularyTree.heading('Падеж', text="Падеж", anchor=W)
 vocabularyTree.heading('Число', text="Число", anchor=W)
@@ -237,7 +272,6 @@ vocabularyTree.column('#3', stretch=NO, minwidth=347, width=200)
 vocabularyTree.column('#4', stretch=NO, minwidth=347, width=200)
 vocabularyTree.column('#5', stretch=NO, minwidth=347, width=200)
 vocabularyTree.column('#6', stretch=NO, minwidth=347, width=200)
-vocabularyTree.column('#7', stretch=NO, minwidth=347, width=200)
 
 # space2 = Label(root, text='\n')
 # editingFrame = Frame(root, bg='grey', bd=5)
@@ -269,9 +303,9 @@ clearSearchButton = Button(searchFrame, text='Сброс', width=8, height=2, bg
 
 createVocabularyButton_textFile.config(command=open_file_to_read)
 createVocabularyButton_textField.config(command=create_vocabulary_from_text_field)
-# clearVocabularyButton.config(command=clearVocabulary)
-# deleteElementButton.config(command=delete_item)
-# searchButton.config(command=get_search_result)
+clearVocabularyButton.config(command=clear_vocabulary)
+deleteElementButton.config(command=delete_item)  # ?
+searchButton.config(command=get_search_result)
 # clearSearchButton.config(command=clear_search_result)
 #
 # editButton.config(command=update_item)
