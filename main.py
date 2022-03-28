@@ -1,9 +1,6 @@
 import io
 from xml.dom import minidom
 
-from PyQt5 import QtWidgets
-from striprtf.striprtf import rtf_to_text
-
 from tkinter import messagebox as mb, scrolledtext
 from tkinter import *
 
@@ -112,11 +109,6 @@ def load_dictionary():
     return temp
 
 
-def show_help():
-    help_text = ""
-    return help_text
-
-
 def open_file_to_read():
     filename = askopenfilename(filetypes=[("pdf file", "*.pdf")],
                                defaultextension=("pdf file", "*.pdf"))
@@ -167,6 +159,33 @@ def parse_text_from_file(string: str):
                 add_flag = False
         if add_flag:
             main_dictionary.append(lex)
+
+
+def load_dictionary():
+    filename = askopenfilename(filetypes=(("dict file", "*.dict"),), defaultextension=("dict file", "*.dict"))
+    if filename is None:
+        return
+    file_str = ''
+    with open(filename) as file:
+        file.readline()
+        for line in file:
+            file_str = file_str + line
+    doc = minidom.parseString(file_str).documentElement
+    word_elements = doc.getElementsByTagName("word")
+
+    main_dictionary.clear()
+    vocabularyTree.delete(*vocabularyTree.get_children())
+    for i in word_elements:
+        word = Word()
+        word.lexeme = i.getElementsByTagName("lexeme")[0].childNodes[0].nodeValue
+        word.normal_form = i.getElementsByTagName("normalized")[0].childNodes[0].nodeValue
+        word.POS = i.getElementsByTagName("POS")[0].childNodes[0].nodeValue
+        word.case = i.getElementsByTagName("case")[0].childNodes[0].nodeValue
+        word.gender = i.getElementsByTagName("gender")[0].childNodes[0].nodeValue
+        word.number = i.getElementsByTagName("number")[0].childNodes[0].nodeValue
+        main_dictionary.append(word)
+
+    update_vocabulary()
 
 
 def create_vocabulary_from_text_field():
@@ -278,7 +297,7 @@ HELPTEXT = '''
 '''
 
 
-def showHelp():
+def show_help():
     mb.showinfo(title="Помощь", message=HELPTEXT)
 
 
@@ -286,7 +305,7 @@ root = Tk()
 main_menu = Menu(root)
 main_menu.add_command(label='Сохранить имеющийся словарь в файл', command=save_dictionary)
 main_menu.add_command(label='Загрузить имеющийся словарь из файла', command=load_dictionary)
-main_menu.add_command(label='Помощь', command=showHelp)
+main_menu.add_command(label='Помощь', command=show_help)
 root.config(menu=main_menu)
 
 space0 = Label(root)
