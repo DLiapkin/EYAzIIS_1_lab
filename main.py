@@ -17,6 +17,18 @@ from pdfminer.pdfpage import PDFPage
 main_dictionary = []
 
 
+cases = {
+    "им": "nomn",
+    "рд": "gent",
+    "дт": "datv",
+    "вн": "accs",
+    "тв": "ablt",
+    "пр": "loct",
+    "ед": "sing",
+    "мн": "plur"
+
+}
+
 class Word:
     # само слово
     lexeme = ''
@@ -102,11 +114,6 @@ def save_dictionary():
 
     file.write(str(xml_str, 'UTF-8'))
     file.close()
-
-
-def load_dictionary():
-    temp = ""
-    return temp
 
 
 def open_file_to_read():
@@ -231,12 +238,30 @@ def get_search_result():
         mb.showerror(title="Empty field error",
                      message="Search field is empty! You are supposed to enter something before clicking that button.")
         return
+    search_req = search_req.replace(',', ' ')
+    request = search_req.split(' ')
+    normalized = request[0]
+    flag = False
+    for w in main_dictionary:
+        if w.normal_form == normalized:
+            flag = True
+    if not flag:
+        mb.showerror(title="Word doesn't exist",
+                     message="There is no such a word in this dictionary.")
+        return
+    params = []
+    for i in range(1, len(request)):
+        params.append(request[i])
+    for j in range(0, len(params)):
+        for i in cases.keys():
+            if params[j] == i:
+                params[j] = cases[i]
 
-    tree_items = vocabularyTree.get_children()
-    for item in tree_items:
-        temp = vocabularyTree.item(item, 'values')
-        if temp[0].lower().find(search_req.lower()) == -1:
-            vocabularyTree.delete(item)
+    morph = MorphAnalyzer()
+    t = morph.parse(normalized)[0]
+    t = t.inflect(set(params))
+    mb.showinfo(title="Результат", message=t.word)
+    update_vocabulary()
 
 
 def delete_item():
