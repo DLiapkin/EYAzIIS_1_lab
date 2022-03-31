@@ -25,9 +25,28 @@ cases = {
     "тв": "ablt",
     "пр": "loct",
     "ед": "sing",
-    "мн": "plur"
-
+    "мн": "plur",
+    "од": "anim",
+    "неод": "inan",
+    "мр": "masc",
+    "жр": "femn",
+    "ср": "neut",
+    "сов": "perf",
+    "несов": "impf",
+    "перех": "tran",
+    "неперех": "intr",
+    "1л": "1per",
+    "2л": "2per",
+    "3л": "3per",
+    "изъяв": "indc",
+    "повел": "impr",
+    "действ": "actv",
+    "страд": "pssv",
+    "наст": "pres",
+    "прош": "past",
+    "буд": "futr"
 }
+
 
 class Word:
     # само слово
@@ -38,10 +57,15 @@ class Word:
     case = ''
     # часть речи
     POS = ''
-    # род
-    gender = ''
-    # число
-    number = ''
+    # остальная информация
+    info = []
+
+    def __init__(self):
+        self.lexeme = ''
+        self.normal_form = ''
+        self.case = ''
+        self.POS = ''
+        self.info = []
 
 
 def extract_text_from_pdf(pdf_path):
@@ -82,30 +106,22 @@ def save_dictionary():
         lexeme = doc.createElement('lexeme')
         normalized = doc.createElement('normalized')
         pos = doc.createElement('POS')
-        gender = doc.createElement('gender')
-        case = doc.createElement('case')
-        number = doc.createElement('number')
+        info = doc.createElement('info')
 
         text1 = doc.createTextNode(i.lexeme)
         text2 = doc.createTextNode(i.normal_form)
         text3 = doc.createTextNode(i.POS)
-        text4 = doc.createTextNode(i.gender)
-        text5 = doc.createTextNode(i.case)
-        text6 = doc.createTextNode(i.number)
 
         lexeme.appendChild(text1)
         normalized.appendChild(text2)
         pos.appendChild(text3)
-        gender.appendChild(text4)
-        case.appendChild(text5)
-        number.appendChild(text6)
+        for j in i.info:
+            info.appendChild(doc.createTextNode(j))
 
         word.appendChild(lexeme)
         word.appendChild(normalized)
         word.appendChild(pos)
-        word.appendChild(gender)
-        word.appendChild(case)
-        word.appendChild(number)
+        word.appendChild(info)
 
         root_el.appendChild(word)
     doc.appendChild(root_el)
@@ -127,45 +143,8 @@ def open_file_to_read():
     else:
         return
 
-    parse_text_from_file(file_str)
+    parse_from_text_field(file_str[0:(len(file_str)-1)])
     update_vocabulary()
-
-
-def parse_text_from_file(string: str):
-    ignore_symbols = [',', ':', ';', '{', '}']
-    string = string[0:(len(string)-2)]
-    for i in ignore_symbols:
-        string = string.replace(i, ' ')
-    text = string.split(' ')
-    while text.__contains__(''):
-        text.remove('')
-    words = []
-    counter = 0
-    while counter < (len(text) - 1):
-        w = Word()
-        w.lexeme = text[counter]
-        counter = counter + 1
-        w.normal_form = text[counter]
-        counter = counter + 1
-        w.POS = text[counter]
-        counter = counter + 1
-        w.case = text[counter]
-        counter = counter + 1
-        w.gender = text[counter]
-        counter = counter + 1
-        w.number = text[counter]
-        counter = counter + 1
-        words.append(w)
-
-    words.sort(key=lambda x: x.lexeme, reverse=True)
-
-    for lex in words:
-        add_flag = True
-        for j in main_dictionary:
-            if lex is j:
-                add_flag = False
-        if add_flag:
-            main_dictionary.append(lex)
 
 
 def load_dictionary():
@@ -187,9 +166,11 @@ def load_dictionary():
         word.lexeme = i.getElementsByTagName("lexeme")[0].childNodes[0].nodeValue
         word.normal_form = i.getElementsByTagName("normalized")[0].childNodes[0].nodeValue
         word.POS = i.getElementsByTagName("POS")[0].childNodes[0].nodeValue
-        word.case = i.getElementsByTagName("case")[0].childNodes[0].nodeValue
-        word.gender = i.getElementsByTagName("gender")[0].childNodes[0].nodeValue
-        word.number = i.getElementsByTagName("number")[0].childNodes[0].nodeValue
+        text = i.getElementsByTagName("info")[0].childNodes[0].nodeValue.replace('\n', '')
+        text = text.split(' ')
+        while text.__contains__(''):
+            text.remove('')
+        word.info = text
         main_dictionary.append(word)
 
     update_vocabulary()
@@ -201,6 +182,7 @@ def create_vocabulary_from_text_field():
     update_vocabulary()
 
 
+# разбор слов
 def parse_from_text_field(string: str):
     ignore_symbols = [',', ':', ';', '{', '}']
     for i in ignore_symbols:
@@ -216,9 +198,36 @@ def parse_from_text_field(string: str):
         w.lexeme = lex
         w.normal_form = morph.normal_forms(lex)[0]
         w.POS = morph.lat2cyr(temp.tag.POS)
-        w.case = morph.lat2cyr(temp.tag.case)
-        w.gender = morph.lat2cyr(temp.tag.gender)
-        w.number = morph.lat2cyr(temp.tag.number)
+        if temp.tag.animacy is not None:
+            w.info.append(morph.lat2cyr(temp.tag.animacy))
+
+        if temp.tag.aspect is not None:
+            w.info.append(morph.lat2cyr(temp.tag.aspect))
+
+        if temp.tag.case is not None:
+            w.info.append(morph.lat2cyr(temp.tag.case))
+
+        if temp.tag.gender is not None:
+            w.info.append(morph.lat2cyr(temp.tag.gender))
+
+        if temp.tag.mood is not None:
+            w.info.append(morph.lat2cyr(temp.tag.mood))
+
+        if temp.tag.number is not None:
+            w.info.append(morph.lat2cyr(temp.tag.number))
+
+        if temp.tag.person is not None:
+            w.info.append(morph.lat2cyr(temp.tag.person))
+
+        if temp.tag.tense is not None:
+            w.info.append(morph.lat2cyr(temp.tag.tense))
+
+        if temp.tag.transitivity is not None:
+            w.info.append(morph.lat2cyr(temp.tag.transitivity))
+
+        if temp.tag.voice is not None:
+            w.info.append(morph.lat2cyr(temp.tag.voice))
+
         words.append(w)
 
     words.sort(key=lambda x: x.lexeme, reverse=True)
@@ -232,6 +241,7 @@ def parse_from_text_field(string: str):
             main_dictionary.append(lex)
 
 
+# поиск по определенному правилу
 def get_search_result():
     search_req = searchEntry.get()
     if search_req == "":
@@ -264,6 +274,7 @@ def get_search_result():
     update_vocabulary()
 
 
+# удаление выбранного элемента
 def delete_item():
     try:
         selected = vocabularyTree.focus()
@@ -288,9 +299,10 @@ def update_vocabulary():
 
     for word in main_dictionary:
         vocabularyTree.insert('', 'end', values=(word.lexeme, word.normal_form,
-                                                 word.POS, word.gender, word.case, word.number))
+                                                 word.POS, word.info))
 
 
+# очистка словаря
 def clear_vocabulary():
     vocabularyTree.delete(*vocabularyTree.get_children())
     main_dictionary.clear()
@@ -305,7 +317,7 @@ HELPTEXT = '''
     Программа предназначена для для обработки текстов на руском языке.
 
     Проверяет слова в файле, определяет их характеристики и на их основе
-может выводить их словоформы.
+может выводить словоформы.
 
     Для сортировки по значениям в отдельных столбцах таблицы нажимать на названия 
 столбцов.
@@ -346,21 +358,17 @@ deleteElementButton = Button(inputFrame, text='Удалить элемент', w
 space1 = Label(root)
 vocabularyFrame = Frame(root, bd=2)
 vocabularyTree = ttk.Treeview(vocabularyFrame,
-                              columns=("Лексема", "Основа", "Часть речи", "Род", "Падеж", "Число"),
+                              columns=("Лексема", "Основа", "Часть речи", "Информация"),
                               selectmode='browse', height=11)
 vocabularyTree.heading('Лексема', text="Лексема", anchor=W)
 vocabularyTree.heading('Основа', text="Основа", anchor=W)
 vocabularyTree.heading('Часть речи', text="Часть речи", anchor=W)
-vocabularyTree.heading('Род', text="Род", anchor=W)
-vocabularyTree.heading('Падеж', text="Падеж", anchor=W)
-vocabularyTree.heading('Число', text="Число", anchor=W)
+vocabularyTree.heading('Информация', text="Информация", anchor=W)
 vocabularyTree.column('#0', stretch=NO, minwidth=0, width=0)
 vocabularyTree.column('#1', stretch=NO, minwidth=347, width=200)
 vocabularyTree.column('#2', stretch=NO, minwidth=347, width=200)
 vocabularyTree.column('#3', stretch=NO, minwidth=347, width=200)
-vocabularyTree.column('#4', stretch=NO, minwidth=347, width=200)
-vocabularyTree.column('#5', stretch=NO, minwidth=347, width=200)
-vocabularyTree.column('#6', stretch=NO, minwidth=347, width=200)
+vocabularyTree.column('#4', stretch=NO, minwidth=347, width=400)
 
 # space2 = Label(root, text='\n')
 # editingFrame = Frame(root, bg='grey', bd=5)
@@ -424,16 +432,16 @@ vocabularyTree.pack()
 # editButton.pack(side='left')
 
 # adding block
-space3.pack()
-addingFrame.pack()
-lexAddingLabel.pack(side='left')
-lexAddingEntry.pack(side='left')
-tagAddingLabel.pack(side='left')
-tagAddingEntry.pack(side='left')
-roleAddingLabel.pack(side='left')
-roleAddingEntry.pack(side='left')
-space31.pack(side='left')
-addButton.pack(side='left')
+# space3.pack()
+# addingFrame.pack()
+# lexAddingLabel.pack(side='left')
+# lexAddingEntry.pack(side='left')
+# tagAddingLabel.pack(side='left')
+# tagAddingEntry.pack(side='left')
+# roleAddingLabel.pack(side='left')
+# roleAddingEntry.pack(side='left')
+# space31.pack(side='left')
+# addButton.pack(side='left')
 
 # searching block
 space4.pack()
