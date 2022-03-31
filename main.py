@@ -312,6 +312,48 @@ if __name__ == '__main__':
     print(extract_text_from_pdf('sample.pdf'))
 
 
+def show_help():
+    mb.showinfo(title="Помощь", message=HELPTEXT)
+
+
+def show_help_request():
+    mb.showinfo(title="Помощь", message=HELPTEXT2)
+
+
+HELPTEXT2 = '''                    
+
+Правила тегов
+    "им": "nomn",
+    "рд": "gent",
+    "дт": "datv",
+    "вн": "accs",
+    "тв": "ablt",
+    "пр": "loct",
+    "ед": "sing",
+    "мн": "plur",
+    "од": "anim",
+    "неод": "inan",
+    "мр": "masc",
+    "жр": "femn",
+    "ср": "neut",
+    "сов": "perf",
+    "несов": "impf",
+    "перех": "tran",
+    "неперех": "intr",
+    "1л": "1per",
+    "2л": "2per",
+    "3л": "3per",
+    "изъяв": "indc",
+    "повел": "impr",
+    "действ": "actv",
+    "страд": "pssv",
+    "наст": "pres",
+    "прош": "past",
+    "буд": "futr"
+
+'''
+
+
 HELPTEXT = '''                    
 
     Программа предназначена для для обработки текстов на руском языке.
@@ -331,10 +373,6 @@ HELPTEXT = '''
 перезаполняется данными из загружаемого
 
 '''
-
-
-def show_help():
-    mb.showinfo(title="Помощь", message=HELPTEXT)
 
 
 root = Tk()
@@ -358,10 +396,10 @@ deleteElementButton = Button(inputFrame, text='Удалить элемент', w
 space1 = Label(root)
 vocabularyFrame = Frame(root, bd=2)
 vocabularyTree = ttk.Treeview(vocabularyFrame,
-                              columns=("Лексема", "Основа", "Часть речи", "Информация"),
+                              columns=("Словоформа", "Лексема", "Часть речи", "Информация"),
                               selectmode='browse', height=11)
+vocabularyTree.heading('Словоформа', text="Словоформа", anchor=W)
 vocabularyTree.heading('Лексема', text="Лексема", anchor=W)
-vocabularyTree.heading('Основа', text="Основа", anchor=W)
 vocabularyTree.heading('Часть речи', text="Часть речи", anchor=W)
 vocabularyTree.heading('Информация', text="Информация", anchor=W)
 vocabularyTree.column('#0', stretch=NO, minwidth=0, width=0)
@@ -370,43 +408,20 @@ vocabularyTree.column('#2', stretch=NO, minwidth=347, width=200)
 vocabularyTree.column('#3', stretch=NO, minwidth=347, width=200)
 vocabularyTree.column('#4', stretch=NO, minwidth=347, width=400)
 
-# space2 = Label(root, text='\n')
-# editingFrame = Frame(root, bg='grey', bd=5)
-# tagEditingLabel = Label(editingFrame, text=' Тэги: ', width=14, height=2, bg='grey', fg='white')
-# tagEditingEntry = Entry(editingFrame, width=23)
-# roleEditingLabel = Label(editingFrame, text=' Роль: ', width=10, height=2, bg='grey', fg='white')
-# roleEditingEntry = Entry(editingFrame, width=23)
-# space21 = Label(editingFrame, text='      ', bg='grey')
-# editButton = Button(editingFrame, text='Изменить', width=8, height=2, bg='grey')
-
-space3 = Label(root, text='\n')
-addingFrame = Frame(root, bg='grey', bd=5)
-lexAddingLabel = Label(addingFrame, text=' Лексема: ', width=14, height=2, bg='grey', fg='white')
-lexAddingEntry = Entry(addingFrame, width=23)
-tagAddingLabel = Label(addingFrame, text=' Тэги: ', width=14, height=2, bg='grey', fg='white')
-tagAddingEntry = Entry(addingFrame, width=23)
-roleAddingLabel = Label(addingFrame, text=' Роль: ', width=10, height=2, bg='grey', fg='white')
-roleAddingEntry = Entry(addingFrame, width=23)
-space31 = Label(addingFrame, text='      ', bg='grey')
-addButton = Button(addingFrame, text='Добавить', width=8, height=2, bg='grey')
-
 space4 = Label(root, text='\n')
 searchFrame = Frame(root, bg='grey', bd=5)
 searchLabel = Label(searchFrame, text=' Запрос: ', width=14, height=2, bg='grey', fg='white')
 searchEntry = Entry(searchFrame, width=23)
 space41 = Label(searchFrame, text='      ', bg='grey')
 searchButton = Button(searchFrame, text='Найти', width=8, height=2, bg='grey')
-clearSearchButton = Button(searchFrame, text='Сброс', width=8, height=2, bg='grey')
+clearSearchButton = Button(searchFrame, text='Помощь', width=8, height=2, bg='grey')
 
 createVocabularyButton_textFile.config(command=open_file_to_read)
 createVocabularyButton_textField.config(command=create_vocabulary_from_text_field)
 clearVocabularyButton.config(command=clear_vocabulary)
 deleteElementButton.config(command=delete_item)
 searchButton.config(command=get_search_result)
-clearSearchButton.config(command=update_vocabulary)
-#
-# editButton.config(command=update_item)
-# addButton.config(command=add_item)
+clearSearchButton.config(command=show_help_request)
 
 space0.pack()
 inputFrame.pack()
@@ -420,28 +435,6 @@ deleteElementButton.pack(side='left')
 space1.pack()
 vocabularyFrame.pack()
 vocabularyTree.pack()
-
-# editing block
-# space2.pack()
-# editingFrame.pack()
-# tagEditingLabel.pack(side='left')
-# tagEditingEntry.pack(side='left')
-# roleEditingLabel.pack(side='left')
-# roleEditingEntry.pack(side='left')
-# space21.pack(side='left')
-# editButton.pack(side='left')
-
-# adding block
-# space3.pack()
-# addingFrame.pack()
-# lexAddingLabel.pack(side='left')
-# lexAddingEntry.pack(side='left')
-# tagAddingLabel.pack(side='left')
-# tagAddingEntry.pack(side='left')
-# roleAddingLabel.pack(side='left')
-# roleAddingEntry.pack(side='left')
-# space31.pack(side='left')
-# addButton.pack(side='left')
 
 # searching block
 space4.pack()
